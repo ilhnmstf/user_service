@@ -18,6 +18,7 @@ spring:
     redis:
       port: 6380
       host: localhost
+      ttl: 7d
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml

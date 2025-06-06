@@ -11,8 +11,10 @@ CREATE TABLE users (
     phone varchar(32) UNIQUE,
     about_me varchar(4096),
     active boolean DEFAULT true NOT NULL,
+    deleted boolean DEFAULT true NOT NULL,
     city varchar(64),
     country_id bigint NOT NULL,
+    deleted_at timestamptz ,
     created_at timestamptz DEFAULT current_timestamp,
     updated_at timestamptz DEFAULT current_timestamp,
 
@@ -28,18 +30,4 @@ CREATE TABLE subscription (
 
     CONSTRAINT fk_follower_id FOREIGN KEY (follower_id) REFERENCES users (id),
     CONSTRAINT fk_followee_id FOREIGN KEY (followee_id) REFERENCES users (id)
-);
-
-CREATE TABLE role (
-    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
-    name varchar(64) UNIQUE NOT NULL
-);
-
-CREATE TABLE users_role (
-    id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY UNIQUE,
-    user_id bigint NOT NULL,
-    role_id bigint NOT NULL,
-
-    CONSTRAINT fk_users_role__user_id FOREIGN KEY (user_id) REFERENCES users (id),
-    CONSTRAINT fk_users_role__role_id FOREIGN KEY (role_id) REFERENCES role (id)
 );

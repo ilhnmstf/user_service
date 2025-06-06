@@ -1,11 +1,19 @@
 package user_service.service;
 
-import user_service.dto.UserAuthDto;
-import user_service.dto.UserCacheDto;
+import user_service.dto.SaveUserDto;
+import user_service.dto.UserDto;
 
 public interface UserService {
 
-    UserAuthDto getUserAuth(String username);
+    UserDto create(SaveUserDto user);
 
-    UserCacheDto getUserCache(long userId);
+    UserDto get(long userId);
+
+    UserDto update(long userId, SaveUserDto user);
+
+    void delete(long userId);
+
+    void subscribe(long userId, long followeeId);
+
+    void unSubscribe(long userId, long followeeId);
 }

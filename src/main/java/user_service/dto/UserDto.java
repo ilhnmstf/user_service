@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Accessors(chain = true)
 @Data
-public class UserCacheDto {
+public class UserDto {
     private long id;
     private List<Long> followeeIds;
     private List<Long> followerIds;

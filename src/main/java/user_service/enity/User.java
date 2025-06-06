@@ -10,14 +10,18 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -50,8 +54,25 @@ public class User {
     @Column(name = "active", nullable = false)
     private boolean active;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted;
+
     @Column(name = "city", length = 64)
     private String city;
+
+    @CreationTimestamp
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "country_id", nullable = false)
@@ -65,10 +86,4 @@ public class User {
 
     @ManyToMany(mappedBy = "followers")
     private List<User> followees;
-
-    @ManyToMany
-    @JoinTable(name = "users_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<UserRole> roles;
 }

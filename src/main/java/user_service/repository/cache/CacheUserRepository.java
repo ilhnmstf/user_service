@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface CacheUserRepository {
 
-    UserDto save(UserDto user);
+    UserDto saveOptimistic(UserDto user);
 
     Optional<UserDto> get(long userId);
 

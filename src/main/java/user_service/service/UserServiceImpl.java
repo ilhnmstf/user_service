@@ -1,8 +1,12 @@
 package user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import user_service.dto.SaveUserDto;
 import user_service.dto.UserDto;
 import user_service.enity.User;
@@ -14,6 +18,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
@@ -31,12 +36,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto get(long userId) {
         return cacheUserRepository.get(userId).orElseGet(() ->
-                cacheUserRepository.save(userMapper.toDto(find(userId))));
+                cacheUserRepository.saveOptimistic(userMapper.toDto(find(userId))));
     }
 
+    @Retryable(
+            retryFor = { OptimisticLockException.class },
+            maxAttempts = 5,
+            backoff = @Backoff(value = 100, multiplier = 2))
     @Override
     public UserDto update(long userId, SaveUserDto userDto) {
-        return saveAndConvert(userMapper.update(find(userId), userDto));
+        return saveAndConvert(
+                userMapper.update(find(userId), userDto)
+                        .setCountry(countryService.get(userDto.getCountryId())));
     }
 
     @Override
@@ -48,18 +59,22 @@ public class UserServiceImpl implements UserService {
         cacheUserRepository.delete(userId);
     }
 
+    @Retryable(
+            retryFor = { OptimisticLockException.class },
+            maxAttempts = 5,
+            backoff = @Backoff(value = 100, multiplier = 2))
     @Override
     public void subscribe(long userId, long followeeId) {
         updateFollowees(userId, followeeId, true);
     }
 
+    @Retryable(
+            retryFor = { OptimisticLockException.class },
+            maxAttempts = 5,
+            backoff = @Backoff(value = 100, multiplier = 2))
     @Override
     public void unSubscribe(long userId, long followeeId) {
         updateFollowees(userId, followeeId, false);
-    }
-
-    private UserDto saveAndConvert(User user) {
-        return cacheUserRepository.save(userMapper.toDto(userRepository.save(user)));
     }
 
     private void updateFollowees(long userId, long followeeId, boolean subscribe) {
@@ -87,5 +102,9 @@ public class UserServiceImpl implements UserService {
         }
 
         return user;
+    }
+
+    private UserDto saveAndConvert(User user) {
+        return cacheUserRepository.saveOptimistic(userMapper.toDto(userRepository.save(user)));
     }
 }

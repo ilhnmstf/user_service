@@ -24,6 +24,7 @@ public interface UserMapper {
     @Mapping(target = "country", ignore = true)
     @Mapping(target = "followers", ignore = true)
     @Mapping(target = "followees", ignore = true)
+    @Mapping(target = "version", ignore = true)
     User toEntity(SaveUserDto user);
 
     @Mapping(target = "followerIds", source = "followers", qualifiedByName = "toIds")
@@ -46,5 +47,6 @@ public interface UserMapper {
     @Mapping(target = "country", ignore = true)
     @Mapping(target = "followers", ignore = true)
     @Mapping(target = "followees", ignore = true)
+    @Mapping(target = "version", ignore = true)
     User update(@MappingTarget User user, SaveUserDto userDto);
 }

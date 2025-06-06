@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -73,6 +74,10 @@ public class User {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Version
+    @Column(name = "version")
+    private int version;
 
     @ManyToOne
     @JoinColumn(name = "country_id", nullable = false)

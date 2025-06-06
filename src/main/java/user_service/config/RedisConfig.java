@@ -9,7 +9,6 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
@@ -55,7 +54,7 @@ public class RedisConfig {
     }
 
     @Bean
-    public HashOperations<String, Long, UserDto> userHashOperations() {
+    public RedisTemplate<String, UserDto> userRedisTemplate() {
         RedisTemplate<String, UserDto> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory());
         template.setKeySerializer(keySerializer());
@@ -65,6 +64,6 @@ public class RedisConfig {
 
         template.afterPropertiesSet();
         log.info("Init user template {}", template);
-        return template.opsForHash();
+        return template;
     }
 }

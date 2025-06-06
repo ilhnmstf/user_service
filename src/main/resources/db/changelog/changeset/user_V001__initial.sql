@@ -17,6 +17,7 @@ CREATE TABLE users (
     deleted_at timestamptz ,
     created_at timestamptz DEFAULT current_timestamp,
     updated_at timestamptz DEFAULT current_timestamp,
+    version INTEGER DEFAULT 0 NOT NULL,
 
     CONSTRAINT fk_country_id FOREIGN KEY (country_id) REFERENCES country (id)
 );

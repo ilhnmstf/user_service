@@ -65,7 +65,9 @@ public class UserServiceImpl implements UserService {
             backoff = @Backoff(value = 100, multiplier = 2))
     @Override
     public void subscribe(long userId, long followeeId) {
-        updateFollowees(userId, followeeId, true);
+        User user = findNotDeleted(userId);
+        User followee = findNotDeleted(followeeId);
+        updateFollowees(user, followee, true);
     }
 
     @Retryable(
@@ -74,13 +76,12 @@ public class UserServiceImpl implements UserService {
             backoff = @Backoff(value = 100, multiplier = 2))
     @Override
     public void unSubscribe(long userId, long followeeId) {
-        updateFollowees(userId, followeeId, false);
-    }
-
-    private void updateFollowees(long userId, long followeeId, boolean subscribe) {
         User user = find(userId);
         User followee = find(followeeId);
+        updateFollowees(user, followee, false);
+    }
 
+    private void updateFollowees(User user, User followee, boolean subscribe) {
         if (subscribe) {
             user.getFollowees().add(followee);
             followee.getFollowers().add(user);

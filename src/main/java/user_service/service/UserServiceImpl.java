@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto get(long userId) {
         return cacheUserRepository.get(userId).orElseGet(() ->
-                cacheUserRepository.saveOptimistic(userMapper.toDto(find(userId))));
+                cacheUserRepository.saveOptimistic(userMapper.toDto(findNotDeleted(userId))));
     }
 
     @Retryable(
@@ -46,13 +46,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto update(long userId, SaveUserDto userDto) {
         return saveAndConvert(
-                userMapper.update(find(userId), userDto)
+                userMapper.update(findNotDeleted(userId), userDto)
                         .setCountry(countryService.get(userDto.getCountryId())));
     }
 
     @Override
     public void delete(long userId) {
-        userRepository.save(find(userId)
+        userRepository.save(findNotDeleted(userId)
                 .setActive(false)
                 .setDeleted(true)
                 .setDeletedAt(LocalDateTime.now()));
@@ -94,8 +94,13 @@ public class UserServiceImpl implements UserService {
     }
 
     private User find(long userId) {
-        User user =  userRepository.findById(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not exists"));
+
+    }
+
+    private User findNotDeleted(long userId) {
+        User user = find(userId);
 
         if (user.isDeleted()) {
             throw new IllegalArgumentException("User with id " + userId + " was deleted");

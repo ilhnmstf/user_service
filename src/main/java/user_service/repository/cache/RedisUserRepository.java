@@ -9,18 +9,23 @@ import user_service.dto.UserDto;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 @Repository
 @Slf4j
 public class RedisUserRepository implements CacheUserRepository {
     private final UserRedisOptimisticOperation userRedisOptimisticOperation;
     private final HashOperations<String, Long, UserDto> userHashOperations;
+    private final ExecutorService saveUserPool;
     private final String key;
 
     @Autowired
-    public RedisUserRepository(RedisTemplate<String, UserDto> userRedisTemplate) {
-        userRedisOptimisticOperation = new UserRedisOptimisticOperation(userRedisTemplate);
+    public RedisUserRepository(RedisTemplate<String, UserDto> userRedisTemplate,
+                               UserRedisOptimisticOperation userRedisOptimisticOperation,
+                               ExecutorService saveUserPool) {
+        this.userRedisOptimisticOperation = userRedisOptimisticOperation;
         userHashOperations = userRedisTemplate.opsForHash();
+        this.saveUserPool = saveUserPool;
         key = "user";
     }
 
@@ -29,20 +34,20 @@ public class RedisUserRepository implements CacheUserRepository {
     public UserDto saveOptimistic(UserDto user) {
         CompletableFuture.runAsync(() ->
                 userRedisOptimisticOperation.saveOptimistic(key + ":" + user.getId(),
-                        () -> userHashOperations.put(key, user.getId(), user))); // todo add pool
-
+                        () -> userHashOperations.put(key, user.getId(), user)), saveUserPool);
         return user;
     }
 
     @Override
     public Optional<UserDto> get(long userId) {
-        log.info("Get value in key {}:{} in redis", key, userId);
-        return Optional.ofNullable(userHashOperations.get(key, userId));
+        UserDto user = userHashOperations.get(key, userId);
+        log.info("Get value {} in key {}:{} in redis", user, key, userId);
+        return Optional.ofNullable(user);
     }
 
     @Override
     public void delete(long userId) {
-        log.info("Delete value in key {}:{} in redis", key, userId);
         userHashOperations.delete(key, userId);
+        log.info("Delete key {}:{} in redis", key, userId);
     }
 }

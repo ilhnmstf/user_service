@@ -1,9 +1,9 @@
 spring:
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5560/postgres
-    username: user
-    password: password
+    driver-class-name: ${DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:5560}/${DATASOURCE_PREFIX:postgres}
+    username: ${DATASOURCE_USERNAME:user}
+    password: ${DATASOURCE_PASSWORD:password}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -16,9 +16,9 @@ spring:
 
   data:
     redis:
-      port: 6380
-      host: localhost
-      ttl: 7d
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      ttl: ${REDIS_TTL:7d}
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -28,10 +28,10 @@ spring:
       write-dates-as-timestamps: false
 
   profiles:
-    active: prod
+    active: ${PROFILE:prod}
 
 server:
-  port: 9000
+  port: ${PORT:9000}
 
 springdoc:
   swagger-ui:
